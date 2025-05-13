@@ -3,7 +3,6 @@ from itertools import combinations #юзал чтоб генерить комб�
 def comb_sum(candidates, target):
     result = set()  #чтоб  хранить ток уникальные комбо
 
-
     for number in candidates:   # Проверяем одиночные элементы
         if number == target:
             result.add((number,))  # Добавляем одиночный элемент как кортеж
