@@ -69,7 +69,7 @@ while True:
                 break
 
         if not found:
-            print("Студент не найден.")
+            print("Студик не найден.")
 
     elif choice == "3":
         # Поиск и вывод информации
@@ -84,7 +84,7 @@ while True:
                 break
 
         if not found:
-            print("Студент не найден.")
+            print("Студик не найден.")
 
     elif choice == "4":
         # Завершение работы
