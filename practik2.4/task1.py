@@ -1,7 +1,7 @@
 
 import sqlite3
 
-# Класс Студент
+# Класс Student описывает одного студента с его данными
 class Student:
     def __init__(self, name, surname, patronymic, group, grade1, grade2, grade3, grade4):
         self.name = name
@@ -13,11 +13,11 @@ class Student:
         self.grade3 = grade3
         self.grade4 = grade4
 
-# Подключение к базе данных
+# Подключение к базе данных (создаст файл students.db, если его нет)
 conn = sqlite3.connect("students.db")
 cursor = conn.cursor()
 
-# Создание таблицы
+# Создание таблицы студентов, если она ещё не существует
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,8 +33,9 @@ CREATE TABLE IF NOT EXISTS students (
 ''')
 conn.commit()
 
-# Добавление студента
+# Функция добавления нового студента
 def add_student():
+    # Получаем данные от пользователя
     name = input("Имя: ")
     surname = input("Фамилия: ")
     patronymic = input("Отчество: ")
@@ -44,25 +45,27 @@ def add_student():
     grade3 = int(input("Оценка 3: "))
     grade4 = int(input("Оценка 4: "))
 
+    # Создаем объект класса Student
     student = Student(name, surname, patronymic, group, grade1, grade2, grade3, grade4)
 
+    # Сохраняем данные в базу
     cursor.execute('''
         INSERT INTO students (name, surname, patronymic, group_name, grade1, grade2, grade3, grade4)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', (student.name, student.surname, student.patronymic, student.group,
           student.grade1, student.grade2, student.grade3, student.grade4))
     conn.commit()
-    print(" Студент добавлен.\n")
+    print("Студент добавлен.\n")
 
-# Показ всех студентов
+# Функция для показа всех студентов
 def show_all():
     cursor.execute("SELECT * FROM students")
     students = cursor.fetchall()
     for student in students:
-        print(student)
+        print(student)  # Просто выводим все поля
     print()
 
-# Показ одного студента
+# Функция для показа одного студента по ID
 def show_one():
     id = input("ID студента: ")
     cursor.execute("SELECT * FROM students WHERE id = ?", (id,))
@@ -76,17 +79,17 @@ def show_one():
         average = (student[5] + student[6] + student[7] + student[8]) / 4
         print("Средний балл:", average)
     else:
-        print(" Студент не найден.")
+        print("Студент не найден.")
     print()
 
-# Удаление студента
+# Функция для удаления студента по ID
 def delete_student():
     id = input("ID студента для удаления: ")
     cursor.execute("DELETE FROM students WHERE id = ?", (id,))
     conn.commit()
-    print("🗑 Удалено.\n")
+    print("Студент удален.\n")
 
-# Средний балл по группе
+# Функция для подсчета среднего балла у всех студентов группы
 def group_avg():
     group = input("Название группы: ")
     cursor.execute("SELECT grade1, grade2, grade3, grade4 FROM students WHERE group_name = ?", (group,))
@@ -95,24 +98,24 @@ def group_avg():
         total = 0
         count = 0
         for row in rows:
+            # Суммируем все оценки
             total += row[0] + row[1] + row[2] + row[3]
             count += 4
         print("Средний балл по группе:", total / count)
     else:
-        print(" Студентов нет.")
+        print("Студентов в этой группе нет.")
     print()
 
-# Редактирование студента
+# Функция для редактирования студента
 def edit_student():
     id = input("ID студента для редактирования: ")
     cursor.execute("SELECT * FROM students WHERE id = ?", (id,))
     student = cursor.fetchone()
     if not student:
-        print(" Не найден.")
+        print("Студент не найден.")
         return
 
-    print("Оставь поле пустым, если менять не нужно.")
-
+    # Запрос новых значений, если не введено — оставляем старые
     name = input(f"Имя ({student[1]}): ")
     if name == "":
         name = student[1]
@@ -153,6 +156,7 @@ def edit_student():
     else:
         grade4 = int(grade4)
 
+    # Обновляем в базе
     cursor.execute('''
         UPDATE students SET
             name = ?, surname = ?, patronymic = ?, group_name = ?,
@@ -160,20 +164,21 @@ def edit_student():
         WHERE id = ?
     ''', (name, surname, patronymic, group, grade1, grade2, grade3, grade4, id))
     conn.commit()
-    print(" Обновлено.\n")
+    print("Данные обновлены.\n")
 
-# Меню
+# Главное меню, откуда запускаются все функции
 def menu():
     while True:
-        print("1 - Добавить")
-        print("2 - Показать всех")
-        print("3 - Показать одного")
-        print("4 - Удалить")
+        print("Меню:")
+        print("1 - Добавить студента")
+        print("2 - Показать всех студентов")
+        print("3 - Показать одного студента")
+        print("4 - Удалить студента")
         print("5 - Средний балл по группе")
-        print("6 - Редактировать")
+        print("6 - Редактировать студента")
         print("0 - Выход")
 
-        choice = input("Выберите: ")
+        choice = input("Выберите пункт: ")
         if choice == "1":
             add_student()
         elif choice == "2":
@@ -187,11 +192,13 @@ def menu():
         elif choice == "6":
             edit_student()
         elif choice == "0":
+            print("Выход из программы.")
             break
         else:
-            print(" Неверный выбор.\n")
+            print("Неверный выбор.\n")
 
-# Запуск
+# Запускаем программу
 menu()
 conn.close()
+
 
